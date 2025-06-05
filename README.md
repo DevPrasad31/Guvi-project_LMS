@@ -1,320 +1,121 @@
-import java.util.*;
- 
-class Account {
-    private String accountNumber;
-    private String accountHolderName;
-    private double balance;
-    private String accountType; // Savings or Checking
-    private boolean isActive;
-    private List<String> transactionHistory;
-    private double overdraftLimit;
-    private static final double INTEREST_RATE = 0.02; // 2% annual interest
- 
-    public Account(String accountNumber, String accountHolderName, String accountType) {
-        this.accountNumber = accountNumber;
-        this.accountHolderName = accountHolderName;
-        this.balance = 0.0;
-        this.accountType = accountType;
-        this.isActive = true;
-        this.transactionHistory = new ArrayList<>();
-        this.overdraftLimit = 500.0; // Default overdraft limit
-    }
+# 🧠 Java IO-Based Project with Basic UI & File Storage
 
-    public String getAccountNumber() {
-        return accountNumber;
-    }
+This project demonstrates a complete Java application built using *JDK, **Java IO, **DAO pattern, and a **console-based user interface*. It follows a structured approach for file-based data persistence and CRUD operations.
 
-    public String getAccountHolderName() {
-        return accountHolderName;
-    }
+---
 
-    public double getBalance() {
-        return balance;
-    }
+## ✅ Project Setup Steps
 
-    public String getAccountType() {
-        return accountType;
-    }
+### 1. Creating the New Project with JDK & IDE Setup
+- Install JDK (version 8 or above).
+- Set up your project in an IDE like IntelliJ IDEA or Eclipse.
+- Configure the build path and create the main class files.
 
-    public boolean isActive() {
-        return isActive;
-    }
+---
 
-    public void deactivate() {
-        isActive = false;
-    }
+### 2. Define the Project Structure
 
-    public void reactivate() {
-        isActive = true;
-    }
+A modular folder structure is followed:
 
-    public void deposit(double amount) {
-        if (amount > 0 && isActive) {
-            balance += amount;
-            transactionHistory.add("Deposited: " + amount);
-            System.out.println("Successfully deposited: " + amount);
-        } else {
-            System.out.println("Deposit amount must be positive or account is inactive.");
-        }
-    }
+project-root/ │ ├── model/             # Java classes representing entities ├── dao/               # DAO classes for CRUD logic ├── io/                # File handling logic ├── ui/                # Console UI logic ├── main/              # Entry point └── data/              # Text/CSV files used for storage
 
-    public void withdraw(double amount) {
-        if (amount > 0 && amount <= balance + overdraftLimit && isActive) {
-            balance -= amount;
-            transactionHistory.add("Withdrawn: " + amount);
-            System.out.println("Successfully withdrawn: " + amount);
-        } else {
-            System.out.println("Insufficient balance/overdraft or invalid amount or account is inactive.");
-        }
-    }
+---
 
-    public void transfer(Account target, double amount) {
-        if (amount > 0 && amount <= balance + overdraftLimit && isActive && target.isActive) {
-            balance -= amount;
-            target.deposit(amount);
-            transactionHistory.add("Transferred: " + amount + " to " + target.getAccountNumber());
-            System.out.println("Successfully transferred: " + amount + " to " + target.getAccountNumber());
-        } else {
-            System.out.println("Transfer failed due to insufficient balance/overdraft or account is inactive.");
-        }
-    }
+### 3. Design the Database Schema (File-based)
 
-    public void calculateInterest() {
-        if (accountType.equals("Savings")) {
-            double interest = balance * INTEREST_RATE;
-            balance += interest;
-            transactionHistory.add("Interest credited: " + interest);
-        }
-    }
+Instead of a traditional RDBMS, we use files to store structured data. Example schema:
 
-    public void printTransactionHistory() {
-        System.out.println("Transaction History for account " + accountNumber + " (" + accountType + "):");
-        for (String transaction : transactionHistory) {
-            System.out.println(transaction);
-        }
-    }
+Account.txt
 
-    public void printFilteredTransactionHistory(String filter) {
-        System.out.println("Filtered Transaction History for account " + accountNumber + " (" + accountType + "):");
-        for (String transaction : transactionHistory) {
-            if (transaction.toLowerCase().contains(filter.toLowerCase())) {
-                System.out.println(transaction);
-            }
-        }
-    }
-}
+AccountNumber | HolderName | Balance | AccountType | IsActive
 
-class BankingSystem {
-    private Map<String, Account> accounts;
-    private Scanner scanner;
+Each entry is stored as a line in a .txt file.
 
-    public BankingSystem() {
-        accounts = new HashMap<>();
-        scanner = new Scanner(System.in);
-    }
+---
 
-    private boolean authenticate(String accountNumber) {
-        System.out.print("Enter account holder name: ");
-        String name = scanner.nextLine();
-        if (accounts.containsKey(accountNumber) && accounts.get(accountNumber).getAccountHolderName().equals(name)) {
-            return true;
-        } else {
-            System.out.println("Authentication failed.");
-            return false;
-        }
-    }
+### 4. Create Files for CRUD Operations
 
-    public void createAccount() {
-        System.out.print("Enter account number: ");
-        String accountNumber = scanner.nextLine();
-        System.out.print("Enter account holder name: ");
-        String accountHolderName = scanner.nextLine();
-        System.out.print("Enter account type (Savings/Checking): ");
-        String accountType = scanner.nextLine();
+- File creation: At application start, check and create necessary files.
+- File structure follows one-record-per-line logic.
+- Fields are separated by delimiters like | or ,.
 
-        if (!accounts.containsKey(accountNumber)) {
-            Account newAccount = new Account(accountNumber, accountHolderName, accountType);
-            accounts.put(accountNumber, newAccount);
-            System.out.println("Account created successfully.");
-        } else {
-            System.out.println("Account number already exists.");
-        }
-    }
+---
 
-    public void deposit() {
-        System.out.print("Enter account number: ");
-        String accountNumber = scanner.nextLine();
+### 5. Implement IO Connectivity using java.io Package
 
-        if (accounts.containsKey(accountNumber) && authenticate(accountNumber)) {
-            System.out.print("Enter deposit amount: ");
-            double amount = scanner.nextDouble();
-            scanner.nextLine();  // Consume newline
-            accounts.get(accountNumber).deposit(amount);
-        } else {
-            System.out.println("Account not found.");
-        }
-    }
+- Use BufferedReader, BufferedWriter, FileReader, FileWriter, etc.
+- Read and write records line by line.
+- Implement methods for:
+  - Storing new data
+  - Reading existing data
+  - Updating a line
+  - Deleting a record (by rewriting file)
 
-    public void withdraw() {
-        System.out.print("Enter account number: ");
-        String accountNumber = scanner.nextLine();
+---
 
-        if (accounts.containsKey(accountNumber) && authenticate(accountNumber)) {
-            System.out.print("Enter withdrawal amount: ");
-            double amount = scanner.nextDouble();
-            scanner.nextLine();  // Consume newline
-            accounts.get(accountNumber).withdraw(amount);
-        } else {
-            System.out.println("Account not found.");
-        }
-    }
+### 6. Create Model and DAO Classes
 
-    public void transferFunds() {
-        System.out.print("Enter source account number: ");
-        String sourceAccountNumber = scanner.nextLine();
-        System.out.print("Enter target account number: ");
-        String targetAccountNumber = scanner.nextLine();
+- *Model Classes* represent real-world entities (Account, User, etc.)
+- *DAO (Data Access Object)* Classes handle:
+  - create()
+  - read()
+  - update()
+  - delete()
 
-        if (accounts.containsKey(sourceAccountNumber) && accounts.containsKey(targetAccountNumber) && authenticate(sourceAccountNumber)) {
-            System.out.print("Enter transfer amount: ");
-            double amount = scanner.nextDouble();
-            scanner.nextLine();  // Consume newline
-            accounts.get(sourceAccountNumber).transfer(accounts.get(targetAccountNumber), amount);
-        } else {
-            System.out.println("Account(s) not found.");
-        }
-    }
+Follows SRP (Single Responsibility Principle) for separation of logic.
 
-    public void printBalance() {
-        System.out.print("Enter account number: ");
-        String accountNumber = scanner.nextLine();
+---
 
-        if (accounts.containsKey(accountNumber) && authenticate(accountNumber)) {
-            double balance = accounts.get(accountNumber).getBalance();
-            System.out.println("Current balance: " + balance);
-        } else {
-            System.out.println("Account not found.");
-        }
-    }
+## 🎨 UI Layer (Console-Based)
 
-    public void printTransactionHistory() {
-        System.out.print("Enter account number: ");
-        String accountNumber = scanner.nextLine();
+### 7. Aesthetics and Visual Appeal
 
-        if (accounts.containsKey(accountNumber) && authenticate(accountNumber)) {
-            accounts.get(accountNumber).printTransactionHistory();
-        } else {
-            System.out.println("Account not found.");
-        }
-    }
+- Text-based menus with clear prompts.
+- Print success/failure messages using standard output.
+- Separator lines and formatted outputs for readability.
 
-    public void printFilteredTransactionHistory() {
-        System.out.print("Enter account number: ");
-        String accountNumber = scanner.nextLine();
+### 8. Component Placement & Alignment
 
-        if (accounts.containsKey(accountNumber) && authenticate(accountNumber)) {
-            System.out.print("Enter filter keyword (e.g., 'Deposit', 'Withdraw', 'Transfer'): ");
-            String filter = scanner.nextLine();
-            accounts.get(accountNumber).printFilteredTransactionHistory(filter);
-        } else {
-            System.out.println("Account not found.");
-        }
-    }
+- Menu-driven structure for user interaction.
+- Clear input prompts followed by logic execution.
+- Proper spacing and indentation for ease of use.
 
-    public void calculateInterest() {
-        for (Account account : accounts.values()) {
-            account.calculateInterest();
-        }
-        System.out.println("Interest calculated and credited to all savings accounts.");
-    }
+### 9. Responsiveness and Accessibility
 
-    public void deactivateAccount() {
-        System.out.print("Enter account number: ");
-        String accountNumber = scanner.nextLine();
+- Prompt for re-entry on wrong input.
+- Case-insensitive inputs.
+- Input validation for numbers, strings, etc.
+- Error messages are descriptive and helpful.
 
-        if (accounts.containsKey(accountNumber) && authenticate(accountNumber)) {
-            accounts.get(accountNumber).deactivate();
-            System.out.println("Account deactivated successfully.");
-        } else {
-            System.out.println("Account not found.");
-        }
-    }
+---
 
-    public void reactivateAccount() {
-        System.out.print("Enter account number: ");
-        String accountNumber = scanner.nextLine();
+## 🔧 Tools & Technologies
 
-        if (accounts.containsKey(accountNumber) && authenticate(accountNumber)) {
-            accounts.get(accountNumber).reactivate();
-            System.out.println("Account reactivated successfully.");
-        } else {
-            System.out.println("Account not found.");
-        }
-    }
+- *Java SE* (JDK 8+)
+- *Java IO Package*
+- *Console UI*
+- *Text File Storage*
 
-    public void run() {
-        while (true) {
-            System.out.println("\n--- Banking System Menu ---");
-            System.out.println("1. Create Account");
-            System.out.println("2. Deposit");
-            System.out.println("3. Withdraw");
-            System.out.println("4. Transfer Funds");
-            System.out.println("5. Check Balance");
-            System.out.println("6. Print Transaction History");
-            System.out.println("7. Print Filtered Transaction History");
-            System.out.println("8. Calculate Interest");
-            System.out.println("9. Deactivate Account");
-            System.out.println("10. Reactivate Account");
-            System.out.println("11. Exit");
-            System.out.print("Choose an option: ");
+---
 
-            int choice = scanner.nextInt();
-            scanner.nextLine();  // Consume newline
+## 🛠 Future Enhancements
 
-            switch (choice) {
-                case 1:
-                    createAccount();
-                    break;
-                case 2:
-                    deposit();
-                    break;
-                case 3:
-                    withdraw();
-                    break;
-                case 4:
-                    transferFunds();
-                    break;
-                case 5:
-                    printBalance();
-                    break;
-                case 6:
-                    printTransactionHistory();
-                    break;
-                case 7:
-                    printFilteredTransactionHistory();
-                    break;
-                case 8:
-                    calculateInterest();
-                    break;
-                case 9:
-                    deactivateAccount();
-                    break;
-                case 10:
-                    reactivateAccount();
-                    break;
-                case 11:
-                    System.out.println("Exiting Banking System.");
-                    return;
-                default:
-                    System.out.println("Invalid choice. Please try again.");
-            }
-        }
-    }
-}
+- Add GUI with *JavaFX* or *Swing*
+- Use *JDBC + MySQL* for real database integration
+- Implement authentication and role-based access
+- Export reports to PDF or CSV
 
-public class AdvancedBankingSystem {
-    public static void main(String[] args) {
-        BankingSystem bankingSystem = new BankingSystem();
-        bankingSystem.run();
-    }
-}
+---
+
+## 📌 Author
+
+*Dev Prasad*
+
+---
+
+## 📄 License
+
+This project is released under the [MIT License](LICENSE).
+
+> Feel free to clone, fork, or enhance this project. Happy coding!
+
